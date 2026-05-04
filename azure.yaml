@@ -4,3 +4,10 @@ metadata:
 infra:
   provider: bicep
   path: ./infra
+services:
+  chat:
+    project: ./src/FoundryChat.Web
+    host: aks
+    language: csharp
+    docker:
+      path: ./src/FoundryChat.Web/Dockerfile
