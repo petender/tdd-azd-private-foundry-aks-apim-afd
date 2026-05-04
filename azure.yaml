@@ -1,0 +1,6 @@
+name: tdd-azd-private-foundry-aks-apim-afd
+metadata:
+  template: tddazd-private-foundry-aks-apim-afd@1.0.0
+infra:
+  provider: bicep
+  path: ./infra
