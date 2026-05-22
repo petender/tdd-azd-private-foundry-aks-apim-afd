@@ -1,0 +1,49 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-app
+  namespace: chat-app
+  labels:
+    app: chat-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chat-app
+  template:
+    metadata:
+      labels:
+        app: chat-app
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: chat-app-sa
+      containers:
+        - name: chat-app
+          image: REGISTRY_PLACEHOLDER/foundrychat:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: FOUNDRY_AGENTS_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: chat-app-secrets
+                  key: FOUNDRY_AGENTS_ENDPOINT
+            - name: AZURE_CLIENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: chat-app-secrets
+                  key: AZURE_CLIENT_ID
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10

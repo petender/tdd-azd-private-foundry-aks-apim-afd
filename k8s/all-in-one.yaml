@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chat-app
+  labels:
+    app: chat-app
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: chat-app-sa
+  namespace: chat-app
+  labels:
+    app: chat-app
+  annotations:
+    azure.workload.identity/client-id: "80b6071d-28e9-4329-affb-436945a91b30"
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chat-app
+  namespace: chat-app
+  labels:
+    app: chat-app
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chat-app
+  template:
+    metadata:
+      labels:
+        app: chat-app
+        azure.workload.identity/use: "true"
+    spec:
+      serviceAccountName: chat-app-sa
+      containers:
+        - name: chat-app
+          image: crpfaaapfa2zmkir.azurecr.io/foundrychat:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: FOUNDRY_PROJECT_ENDPOINT
+              valueFrom:
+                secretKeyRef:
+                  name: chat-app-secrets
+                  key: FOUNDRY_PROJECT_ENDPOINT
+            - name: FOUNDRY_AGENT_ID
+              valueFrom:
+                secretKeyRef:
+                  name: chat-app-secrets
+                  key: FOUNDRY_AGENT_ID
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 15
+            periodSeconds: 10
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: chat-app
+  namespace: chat-app
+  annotations:
+    service.beta.kubernetes.io/azure-load-balancer-internal: "true"
+spec:
+  type: LoadBalancer
+  selector:
+    app: chat-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 8080
+
