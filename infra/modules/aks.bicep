@@ -46,7 +46,7 @@ resource aksCluster 'Microsoft.ContainerService/managedClusters@2024-06-02-previ
       {
         name: 'systempool'
         count: 2
-        vmSize: 'Standard_D2s_v3'
+        vmSize: 'Standard_D2ds_v5'
         osType: 'Linux'
         osSKU: 'Ubuntu'
         mode: 'System'

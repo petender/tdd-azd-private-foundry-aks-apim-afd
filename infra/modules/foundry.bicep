@@ -117,6 +117,7 @@ resource openAiPe 'Microsoft.Network/privateEndpoints@2024-01-01' = {
   name: 'pe-${openAiName}'
   location: location
   tags: tags
+  dependsOn: [gpt4oDeployment]
   properties: {
     subnet: { id: privateEndpointSubnetId }
     privateLinkServiceConnections: [
